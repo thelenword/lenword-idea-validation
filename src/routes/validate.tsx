@@ -476,12 +476,13 @@ function Navbar({ onCta }: { onCta: () => void }) {
         </Link>
         <nav className="hidden md:flex items-center gap-2">
           <ThemeToggle />
-          <button
-            onClick={() => document.getElementById("how")?.scrollIntoView({ behavior: "smooth" })}
+          <Link
+            to="/"
+            hash="how-it-works"
             className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition"
           >
             How It Works
-          </button>
+          </Link>
           <button
             onClick={onCta}
             className="btn-primary text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-primary/20 transition"
@@ -495,15 +496,14 @@ function Navbar({ onCta }: { onCta: () => void }) {
       </div>
       {open && (
         <div className="md:hidden border-t border-border bg-card px-6 py-4 flex flex-col gap-3">
-          <button
-            onClick={() => {
-              setOpen(false);
-              document.getElementById("how")?.scrollIntoView({ behavior: "smooth" });
-            }}
+          <Link
+            to="/"
+            hash="how-it-works"
+            onClick={() => setOpen(false)}
             className="text-left py-2 text-muted-foreground"
           >
             How It Works
-          </button>
+          </Link>
           <button
             onClick={() => {
               setOpen(false);
@@ -1765,12 +1765,12 @@ function Footer() {
           <p className="mt-3 text-white/60 max-w-sm">Helping founders build better, faster.</p>
         </div>
         <nav className="flex flex-wrap gap-x-6 gap-y-2 md:justify-end text-sm text-white/70">
-          <a href="#top" className="hover:text-white transition">
+          <Link to="/" hash="home" className="hover:text-white transition">
             Home
-          </a>
-          <a href="#how" className="hover:text-white transition">
+          </Link>
+          <Link to="/" hash="how-it-works" className="hover:text-white transition">
             How It Works
-          </a>
+          </Link>
           <a href="#validate" className="hover:text-white transition">
             Validate My Idea
           </a>

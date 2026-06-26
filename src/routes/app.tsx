@@ -29,9 +29,6 @@ export const Route = createFileRoute("/app")({
 const nav = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/app/reports", label: "Reports", icon: FileText },
-  { to: "/app/market", label: "Market", icon: BarChart3 },
-  { to: "/app/insights", label: "Insights", icon: Lightbulb },
-  { to: "/app/team", label: "Team", icon: Users },
   { to: "/app/settings", label: "Settings", icon: Settings },
 ];
 
@@ -41,12 +38,31 @@ function AppLayout() {
   const [searchQuery, setSearchQuery] = useState("");
   const { user, profile } = useAuth();
   const { setTheme } = useTheme();
+  const [reportsCount, setReportsCount] = useState<number | null>(null);
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchQuery.trim()) {
       navigate({ to: "/app/reports", search: { q: searchQuery.trim() } });
     }
   };
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      if (!user) return;
+      try {
+        const { count, error } = await supabase
+          .from("validation_reports")
+          .select("*", { count: "exact", head: true });
+        
+        if (!error && count !== null) {
+          setReportsCount(count);
+        }
+      } catch (err) {
+        console.error("Error fetching reports count:", err);
+      }
+    };
+    fetchCount();
+  }, [user]);
 
   useEffect(() => {
     if (profile?.preferences && typeof profile.preferences === 'object' && 'theme' in profile.preferences) {
@@ -98,8 +114,8 @@ function AppLayout() {
                 {active && <motion.span layoutId="nav-dot" className="absolute left-0 h-5 w-1 rounded-r-full" style={{ background: "var(--gradient-primary)" }} />}
                 <n.icon className={`h-4 w-4 transition ${active ? "text-primary" : "group-hover:text-primary"}`} />
                 <span className="flex-1">{n.label}</span>
-                {n.label === "Reports" && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">12</span>
+                {n.label === "Reports" && reportsCount !== null && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">{reportsCount}</span>
                 )}
               </Link>
             );

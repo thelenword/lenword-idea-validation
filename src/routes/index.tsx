@@ -1,8 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
 import {
   Sparkles, ArrowRight, ShieldCheck, TrendingUp, Target, Zap,
-  BarChart3, Brain, Rocket, CheckCircle2, Star, ClipboardList, FileText
+  BarChart3, Brain, Rocket, CheckCircle2, Star, ClipboardList, FileText,
+  Menu, X, Plus, Minus
 } from "lucide-react";
 import { AuroraBackground } from "@/components/AuroraBackground";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
@@ -29,6 +31,17 @@ const fadeUp: import("framer-motion").Variants = {
 
 function Nav() {
   const { user, profile, loading } = useAuth();
+  const [open, setOpen] = useState(false);
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, targetId: string) => {
+    e.preventDefault();
+    setOpen(false);
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+      window.history.pushState(null, "", `#${targetId}`);
+    }
+  };
 
   return (
     <header className="relative z-30">
@@ -37,10 +50,10 @@ function Nav() {
           <span className="font-semibold tracking-tight">LENWORD</span>
         </Link>
         <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-          <a href="#features" className="hover:text-foreground transition">Features</a>
-          <a href="#preview" className="hover:text-foreground transition">Product</a>
-          <a href="#pricing" className="hover:text-foreground transition">Pricing</a>
-          <a href="#faq" className="hover:text-foreground transition">FAQ</a>
+          <a href="#home" onClick={(e) => handleNavClick(e, "home")} className="hover:text-foreground transition">Home</a>
+          <a href="#how-it-works" onClick={(e) => handleNavClick(e, "how-it-works")} className="hover:text-foreground transition">How It Works</a>
+          <a href="#features" onClick={(e) => handleNavClick(e, "features")} className="hover:text-foreground transition">Features</a>
+          <a href="#faq" onClick={(e) => handleNavClick(e, "faq")} className="hover:text-foreground transition">FAQ</a>
         </nav>
         <div className="flex items-center gap-3">
           <ThemeToggle />
@@ -60,15 +73,51 @@ function Nav() {
           <Link to="/app/dashboard" className="btn-primary inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium">
             Open app <ArrowRight className="h-3.5 w-3.5" />
           </Link>
+          <button
+            onClick={() => setOpen(!open)}
+            className="md:hidden p-2 text-foreground focus:outline-none hover:text-primary transition"
+            aria-label="Toggle menu"
+          >
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
         </div>
       </div>
+      {/* Mobile navigation */}
+      {open && (
+        <div className="md:hidden border-b border-border/60 bg-background px-6 py-4 flex flex-col gap-3 absolute top-full left-0 right-0 z-50 shadow-[var(--shadow-soft)]">
+          <button
+            onClick={(e) => handleNavClick(e, "home")}
+            className="text-left py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition"
+          >
+            Home
+          </button>
+          <button
+            onClick={(e) => handleNavClick(e, "how-it-works")}
+            className="text-left py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition"
+          >
+            How It Works
+          </button>
+          <button
+            onClick={(e) => handleNavClick(e, "features")}
+            className="text-left py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition"
+          >
+            Features
+          </button>
+          <button
+            onClick={(e) => handleNavClick(e, "faq")}
+            className="text-left py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition"
+          >
+            FAQ
+          </button>
+        </div>
+      )}
     </header>
   );
 }
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden">
+    <section id="home" className="relative overflow-hidden">
       <AuroraBackground />
       <div className="relative mx-auto max-w-7xl px-6 pt-16 pb-32 lg:pt-24 lg:pb-40">
 
@@ -304,7 +353,7 @@ function HowItWorks() {
     },
   ];
   return (
-    <section id="how" className="py-24 px-6 bg-background">
+    <section id="how-it-works" className="py-24 px-6 bg-background">
       <div className="max-w-7xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.8 }} className="text-center max-w-2xl mx-auto">
           <div className="text-xs font-display font-semibold uppercase tracking-[0.18em] text-primary">
@@ -423,13 +472,157 @@ function Footer() {
   );
 }
 
+function FAQSection() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const faqs = [
+    {
+      q: "Is LENWORD completely free?",
+      a: "Yes. LENWORD's AI Idea Validator is currently free to use while we continue improving the platform and adding new features."
+    },
+    {
+      q: "How does LENWORD evaluate my startup idea?",
+      a: "LENWORD analyzes your startup idea across multiple dimensions including problem validation, solution strength, uniqueness, market potential, business viability, possible risks, and actionable improvements before generating a detailed AI report."
+    },
+    {
+      q: "Will LENWORD steal or share my startup idea?",
+      a: "No. Your startup ideas are treated as private and are not publicly displayed or shared without your permission."
+    },
+    {
+      q: "Does LENWORD guarantee startup success?",
+      a: "No. LENWORD provides AI-powered analysis and feedback to help founders make better decisions, but no AI tool can guarantee the success of a business."
+    },
+    {
+      q: "Can I validate multiple startup ideas?",
+      a: "Yes. You can submit and validate as many startup ideas as you like."
+    },
+    {
+      q: "What features are coming next?",
+      a: (
+        <div>
+          <p>Our roadmap includes:</p>
+          <ul className="mt-2 space-y-1.5 pl-1">
+            <li className="flex items-start gap-2">
+              <span className="text-primary font-bold">•</span>
+              <span>AI Business Plan Generator</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary font-bold">•</span>
+              <span>Mentor Marketplace</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary font-bold">•</span>
+              <span>Investor Dashboard</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary font-bold">•</span>
+              <span>Founder Community</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary font-bold">•</span>
+              <span>Startup Progress Tracking</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary font-bold">•</span>
+              <span>Advanced Startup Analytics</span>
+            </li>
+          </ul>
+        </div>
+      )
+    }
+  ];
+
+  return (
+    <section id="faq" className="py-24 px-6 bg-background">
+      <div className="max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.8 }}
+          className="text-center max-w-2xl mx-auto mb-14"
+        >
+          <div className="text-xs font-display font-semibold uppercase tracking-[0.18em] text-primary">
+            FAQ
+          </div>
+          <h2 className="mt-3 font-display font-extrabold text-4xl md:text-5xl">
+            Frequently Asked Questions
+          </h2>
+        </motion.div>
+        <div className="space-y-4">
+          {faqs.map((faq, index) => {
+            const isOpen = openIndex === index;
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                className="rounded-2xl border border-border/60 bg-white/50 dark:bg-card/50 overflow-hidden transition-colors duration-300"
+              >
+                <button
+                  onClick={() => setOpenIndex(isOpen ? null : index)}
+                  className="w-full flex items-center justify-between p-6 text-left font-medium text-lg hover:text-primary transition-colors focus:outline-none"
+                >
+                  <span className="font-semibold pr-4 text-foreground">{faq.q}</span>
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                    {isOpen ? <Minus size={16} /> : <Plus size={16} />}
+                  </span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    >
+                      <div className="px-6 pb-6 text-muted-foreground text-sm leading-relaxed border-t border-border/10 pt-4">
+                        {faq.a}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Landing() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace(/^#/, "");
+      const element = document.getElementById(id);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    } else if (window.location.hash) {
+      const id = window.location.hash.replace(/^#/, "");
+      const element = document.getElementById(id);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    }
+  }, [location.hash]);
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-background">
       <Nav />
       <Hero />
       <HowItWorks />
       <Features />
+      <FAQSection />
       <CTA />
       <Footer />
     </div>
