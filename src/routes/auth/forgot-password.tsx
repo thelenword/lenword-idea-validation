@@ -19,14 +19,20 @@ function ForgotPassword() {
       await resetPassword(email)
       setSuccess(true)
     } catch (err: any) {
-      setError(err.message || 'Failed to send reset email')
+      let errorMessage = err?.message || 'Failed to send reset email'
+      if (typeof errorMessage === 'object' || errorMessage === '{}') {
+        errorMessage = 'Too many attempts or server error. Please try again later.'
+      } else if (errorMessage.toLowerCase().includes('rate limit')) {
+        errorMessage = 'Too many attempts. Please wait a few minutes.'
+      }
+      setError(errorMessage)
     }
   }
 
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-border text-center">
+        <div className="w-full max-w-md bg-card text-card-foreground rounded-2xl shadow-xl p-8 border border-border text-center">
           <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
             ✓
           </div>
@@ -64,7 +70,7 @@ function ForgotPassword() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition"
+              className="w-full px-4 py-2 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition"
               placeholder="you@example.com"
             />
           </div>

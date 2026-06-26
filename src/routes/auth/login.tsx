@@ -31,13 +31,17 @@ function Login() {
       await signIn({ email, password })
       navigate({ to: '/app/dashboard' })
     } catch (err: any) {
-      setError(err.message || 'Failed to login')
+      if (err.message === 'Invalid login credentials') {
+        setError('Invalid email or password. If you recently signed up, please check your email to verify your account.')
+      } else {
+        setError(err.message || 'Failed to login')
+      }
     }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-border">
+      <div className="w-full max-w-md bg-card text-card-foreground rounded-2xl shadow-xl p-8 border border-border">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
           <p className="text-muted-foreground mt-2">Sign in to your account</p>
@@ -93,7 +97,7 @@ function Login() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition"
+              className="w-full px-4 py-2 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition"
               placeholder="you@example.com"
             />
           </div>
@@ -110,7 +114,7 @@ function Login() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-border rounded-xl bg-transparent focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition pr-10"
+                className="w-full px-4 py-2 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition pr-10"
                 placeholder="••••••••"
               />
               <button

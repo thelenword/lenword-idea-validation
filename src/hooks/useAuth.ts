@@ -16,6 +16,7 @@ interface AuthContextValue {
   signInWithGoogle: () => Promise<any>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<any>;
+  resendVerification: (email: string) => Promise<any>;
   updateProfile: (updates: Database["public"]["Tables"]["profiles"]["Update"]) => Promise<Profile | null>;
   uploadAvatar: (file: File) => Promise<string>;
 }
@@ -84,9 +85,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           full_name: fullName,
           role,
         },
+        emailRedirectTo: `${window.location.origin}/auth/verify-email`,
       },
     });
     setLoading(false);
+    if (error) throw error;
+    return data;
+  }, []);
+
+  const resendVerification = useCallback(async (email: string) => {
+    const { data, error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/verify-email`,
+      },
+    });
     if (error) throw error;
     return data;
   }, []);
@@ -107,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/app/dashboard`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     setLoading(false);
@@ -203,6 +217,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signInWithGoogle,
     signOut,
     resetPassword,
+    resendVerification,
     updateProfile,
     uploadAvatar,
   };

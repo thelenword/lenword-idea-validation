@@ -59,7 +59,7 @@ function ResetPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-border">
+      <div className="w-full max-w-md bg-card text-card-foreground rounded-2xl shadow-xl p-8 border border-border">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-foreground">Reset Password</h1>
           <p className="text-muted-foreground mt-2">Enter your new password below.</p>
@@ -86,7 +86,7 @@ function ResetPassword() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition"
+                className="w-full px-4 py-2 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition"
                 placeholder="••••••••"
               />
             </div>
@@ -97,7 +97,7 @@ function ResetPassword() {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition"
+                className="w-full px-4 py-2 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition"
                 placeholder="••••••••"
               />
             </div>
