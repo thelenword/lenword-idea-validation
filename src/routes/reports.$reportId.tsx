@@ -24,7 +24,7 @@ function PublicReportView() {
         // If they are actually logged in, redirect them to the real dashboard view
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          navigate({ to: `/app/reports/${reportId}` });
+          navigate({ to: "/app/reports/$reportId", params: { reportId } });
           return;
         }
 

@@ -27,6 +27,9 @@ def run_validation_pipeline(report_id: str, user_id: str, startup_name: str, ans
         # get_validation is async, so we use asyncio.run to execute it in this thread
         report = asyncio.run(get_validation(payload))
 
+        # Ensure meta uses the correct database UUID and timestamps
+        report.meta.id = report_id
+        
         # Update Supabase with the report JSON and score
         report_dict = report.model_dump()
         score = report.scorecard.overall_score

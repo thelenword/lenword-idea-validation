@@ -41,11 +41,11 @@ class TestIdeaValidatorAPI(unittest.TestCase):
 
     @patch('app.routers.validate.supabase_client')
     @patch('app.services.ai_orchestrator.analyze_input_quality')
-    @patch('app.services.ai_orchestrator.call_grok')
+    @patch('app.services.ai_orchestrator.call_groq')
     @patch('app.services.ai_orchestrator.settings')
-    def test_validate_idea_success(self, mock_settings, mock_call_grok, mock_analyze_quality, mock_supabase):
+    def test_validate_idea_success(self, mock_settings, mock_call_groq, mock_analyze_quality, mock_supabase):
         """Test validation endpoint works with new schema."""
-        mock_settings.XAI_API_KEY = "dummy-key"
+        mock_settings.GROQ_API_KEY = "dummy-key"
         mock_settings.GEMINI_API_KEY = "dummy-key"
         mock_analyze_quality.return_value = (1.0, "GOOD", {})
         
@@ -104,7 +104,7 @@ class TestIdeaValidatorAPI(unittest.TestCase):
             },
             "deep_narrative_summary": "Overall very promising idea with clear path to validation."
         }
-        mock_call_grok.return_value = json.dumps(mock_report)
+        mock_call_groq.return_value = json.dumps(mock_report)
 
         response = self.client.post("/api/validate-idea", json=self.valid_payload)
         self.assertEqual(response.status_code, 200)
@@ -113,11 +113,11 @@ class TestIdeaValidatorAPI(unittest.TestCase):
         self.assertEqual(data["status"], "pending")
         self.assertIn("report_id", data)
 
-    @patch('app.services.ai_orchestrator.call_grok')
+    @patch('app.services.ai_orchestrator.call_groq')
     @patch('app.services.ai_orchestrator.settings')
-    def test_export_pdf(self, mock_settings, mock_call_grok):
+    def test_export_pdf(self, mock_settings, mock_call_groq):
         """Test PDF export with new schema."""
-        mock_settings.XAI_API_KEY = "dummy-key"
+        mock_settings.GROQ_API_KEY = "dummy-key"
         mock_settings.GEMINI_API_KEY = "dummy-key"
         
         # Setup valid report first

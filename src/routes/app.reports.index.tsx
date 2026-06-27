@@ -1,11 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Filter, Download, Search, MoreHorizontal, FileText, Sparkles, Loader2 } from "lucide-react";
+import { Filter, Download, Search, MoreHorizontal, FileText, Sparkles, Loader2, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/app/reports")({
+export const Route = createFileRoute("/app/reports/")({
   validateSearch: (search: Record<string, unknown>): { q?: string } => {
     return { q: search.q as string | undefined };
   },
@@ -21,6 +21,7 @@ const statusStyles: Record<string, string> = {
 
 function Reports() {
   const { q } = Route.useSearch();
+  const navigate = useNavigate();
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [localSearch, setLocalSearch] = useState(q || "");
@@ -60,6 +61,65 @@ function Reports() {
     return !term || nameMatch || descMatch;
   });
 
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this report?")) return;
+    try {
+      const { error } = await supabase.from("validation_reports").delete().eq("id", id);
+      if (error) throw error;
+      setReports(reports.filter((r) => r.id !== id));
+      toast.success("Report deleted successfully");
+    } catch (err) {
+      toast.error("Failed to delete report");
+    }
+  };
+
+  const handleDownload = async (e: React.MouseEvent, reportRow: any) => {
+    e.stopPropagation();
+    try {
+      if (reportRow.pdf_url) {
+        window.open(reportRow.pdf_url, '_blank');
+        return;
+      }
+      
+      if (!reportRow.report_data) {
+        toast.error("Report data is not available yet.");
+        return;
+      }
+
+      toast.loading("Generating PDF...", { id: `pdf-${reportRow.id}` });
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await fetch(`${apiBaseUrl}/api/export-pdf`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({
+          ...reportRow.report_data,
+          startupName: reportRow.startup_name || "startup",
+        }),
+      });
+
+      if (!response.ok) throw new Error(`Failed to export PDF`);
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${(reportRow.startup_name || "startup").replace(/[^a-zA-Z0-9]/g, "-")}-validation-report.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("PDF downloaded!", { id: `pdf-${reportRow.id}` });
+    } catch (err) {
+      toast.error("Failed to download PDF", { id: `pdf-${reportRow.id}` });
+    }
+  };
 
 
   return (
@@ -130,9 +190,9 @@ function Reports() {
               
               return (
               <motion.tr key={r.id}
-                onClick={() => r.pdf_url && window.open(r.pdf_url, '_blank')}
+                onClick={() => navigate({ to: `/app/reports/${r.id}` })}
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.04 }}
-                className={`border-t border-border/60 hover:bg-muted/30 transition group ${r.pdf_url ? 'cursor-pointer' : ''}`}>
+                className={`border-t border-border/60 hover:bg-muted/30 transition group cursor-pointer`}>
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
                     <div className={`h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-400 to-primary flex items-center justify-center text-white shadow-md`}>
@@ -157,9 +217,14 @@ function Reports() {
                 <td className="px-5 py-4"><span className={`text-xs px-2 py-1 rounded-full border ${statusStyles["Ready"]}`}>Ready</span></td>
                 <td className="px-5 py-4 text-xs text-muted-foreground">{date}</td>
                 <td className="px-5 py-4 text-right">
-                  <button className="h-8 w-8 rounded-lg hover:bg-muted inline-flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center justify-end gap-4 transition mr-8">
+                    <button onClick={(e) => handleDownload(e, r)} className="h-8 w-8 rounded-lg hover:bg-muted inline-flex items-center justify-center text-muted-foreground hover:text-foreground transition" aria-label="Download PDF">
+                      <Download className="h-4 w-4" />
+                    </button>
+                    <button onClick={(e) => handleDelete(e, r.id)} className="h-8 w-8 rounded-lg hover:bg-red-50 text-muted-foreground hover:text-red-500 transition inline-flex items-center justify-center" aria-label="Delete report">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </td>
               </motion.tr>
               );

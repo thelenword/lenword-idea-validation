@@ -21,8 +21,11 @@ import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
-import { Route as AppReportsRouteImport } from './routes/app.reports'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
+import { Route as AppReportsIndexRouteImport } from './routes/app.reports.index'
+import { Route as AppSettingsSecurityRouteImport } from './routes/app.settings.security'
+import { Route as AppSettingsAppearanceRouteImport } from './routes/app.settings.appearance'
+import { Route as AppSettingsAccountRouteImport } from './routes/app.settings.account'
 import { Route as AppReportsReportIdRouteImport } from './routes/app.reports.$reportId'
 
 const ValidateRoute = ValidateRouteImport.update({
@@ -85,20 +88,35 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
-const AppReportsRoute = AppReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppReportsIndexRoute = AppReportsIndexRouteImport.update({
+  id: '/reports/',
+  path: '/reports/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsSecurityRoute = AppSettingsSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsAppearanceRoute = AppSettingsAppearanceRouteImport.update({
+  id: '/appearance',
+  path: '/appearance',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsAccountRoute = AppSettingsAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
 const AppReportsReportIdRoute = AppReportsReportIdRouteImport.update({
-  id: '/$reportId',
-  path: '/$reportId',
-  getParentRoute: () => AppReportsRoute,
+  id: '/reports/$reportId',
+  path: '/reports/$reportId',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -106,8 +124,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/validate': typeof ValidateRoute
   '/app/dashboard': typeof AppDashboardRoute
-  '/app/reports': typeof AppReportsRouteWithChildren
-  '/app/settings': typeof AppSettingsRoute
+  '/app/settings': typeof AppSettingsRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -117,13 +134,16 @@ export interface FileRoutesByFullPath {
   '/reports/$reportId': typeof ReportsReportIdRoute
   '/app/': typeof AppIndexRoute
   '/app/reports/$reportId': typeof AppReportsReportIdRoute
+  '/app/settings/account': typeof AppSettingsAccountRoute
+  '/app/settings/appearance': typeof AppSettingsAppearanceRoute
+  '/app/settings/security': typeof AppSettingsSecurityRoute
+  '/app/reports/': typeof AppReportsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/validate': typeof ValidateRoute
   '/app/dashboard': typeof AppDashboardRoute
-  '/app/reports': typeof AppReportsRouteWithChildren
-  '/app/settings': typeof AppSettingsRoute
+  '/app/settings': typeof AppSettingsRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -133,6 +153,10 @@ export interface FileRoutesByTo {
   '/reports/$reportId': typeof ReportsReportIdRoute
   '/app': typeof AppIndexRoute
   '/app/reports/$reportId': typeof AppReportsReportIdRoute
+  '/app/settings/account': typeof AppSettingsAccountRoute
+  '/app/settings/appearance': typeof AppSettingsAppearanceRoute
+  '/app/settings/security': typeof AppSettingsSecurityRoute
+  '/app/reports': typeof AppReportsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -140,8 +164,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/validate': typeof ValidateRoute
   '/app/dashboard': typeof AppDashboardRoute
-  '/app/reports': typeof AppReportsRouteWithChildren
-  '/app/settings': typeof AppSettingsRoute
+  '/app/settings': typeof AppSettingsRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -151,6 +174,10 @@ export interface FileRoutesById {
   '/reports/$reportId': typeof ReportsReportIdRoute
   '/app/': typeof AppIndexRoute
   '/app/reports/$reportId': typeof AppReportsReportIdRoute
+  '/app/settings/account': typeof AppSettingsAccountRoute
+  '/app/settings/appearance': typeof AppSettingsAppearanceRoute
+  '/app/settings/security': typeof AppSettingsSecurityRoute
+  '/app/reports/': typeof AppReportsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -159,7 +186,6 @@ export interface FileRouteTypes {
     | '/app'
     | '/validate'
     | '/app/dashboard'
-    | '/app/reports'
     | '/app/settings'
     | '/auth/callback'
     | '/auth/forgot-password'
@@ -170,12 +196,15 @@ export interface FileRouteTypes {
     | '/reports/$reportId'
     | '/app/'
     | '/app/reports/$reportId'
+    | '/app/settings/account'
+    | '/app/settings/appearance'
+    | '/app/settings/security'
+    | '/app/reports/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/validate'
     | '/app/dashboard'
-    | '/app/reports'
     | '/app/settings'
     | '/auth/callback'
     | '/auth/forgot-password'
@@ -186,13 +215,16 @@ export interface FileRouteTypes {
     | '/reports/$reportId'
     | '/app'
     | '/app/reports/$reportId'
+    | '/app/settings/account'
+    | '/app/settings/appearance'
+    | '/app/settings/security'
+    | '/app/reports'
   id:
     | '__root__'
     | '/'
     | '/app'
     | '/validate'
     | '/app/dashboard'
-    | '/app/reports'
     | '/app/settings'
     | '/auth/callback'
     | '/auth/forgot-password'
@@ -203,6 +235,10 @@ export interface FileRouteTypes {
     | '/reports/$reportId'
     | '/app/'
     | '/app/reports/$reportId'
+    | '/app/settings/account'
+    | '/app/settings/appearance'
+    | '/app/settings/security'
+    | '/app/reports/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -304,13 +340,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/reports': {
-      id: '/app/reports'
-      path: '/reports'
-      fullPath: '/app/reports'
-      preLoaderRoute: typeof AppReportsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/app/dashboard': {
       id: '/app/dashboard'
       path: '/dashboard'
@@ -318,40 +347,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/reports/': {
+      id: '/app/reports/'
+      path: '/reports'
+      fullPath: '/app/reports/'
+      preLoaderRoute: typeof AppReportsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings/security': {
+      id: '/app/settings/security'
+      path: '/security'
+      fullPath: '/app/settings/security'
+      preLoaderRoute: typeof AppSettingsSecurityRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/appearance': {
+      id: '/app/settings/appearance'
+      path: '/appearance'
+      fullPath: '/app/settings/appearance'
+      preLoaderRoute: typeof AppSettingsAppearanceRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/account': {
+      id: '/app/settings/account'
+      path: '/account'
+      fullPath: '/app/settings/account'
+      preLoaderRoute: typeof AppSettingsAccountRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/app/reports/$reportId': {
       id: '/app/reports/$reportId'
-      path: '/$reportId'
+      path: '/reports/$reportId'
       fullPath: '/app/reports/$reportId'
       preLoaderRoute: typeof AppReportsReportIdRouteImport
-      parentRoute: typeof AppReportsRoute
+      parentRoute: typeof AppRoute
     }
   }
 }
 
-interface AppReportsRouteChildren {
-  AppReportsReportIdRoute: typeof AppReportsReportIdRoute
+interface AppSettingsRouteChildren {
+  AppSettingsAccountRoute: typeof AppSettingsAccountRoute
+  AppSettingsAppearanceRoute: typeof AppSettingsAppearanceRoute
+  AppSettingsSecurityRoute: typeof AppSettingsSecurityRoute
 }
 
-const AppReportsRouteChildren: AppReportsRouteChildren = {
-  AppReportsReportIdRoute: AppReportsReportIdRoute,
+const AppSettingsRouteChildren: AppSettingsRouteChildren = {
+  AppSettingsAccountRoute: AppSettingsAccountRoute,
+  AppSettingsAppearanceRoute: AppSettingsAppearanceRoute,
+  AppSettingsSecurityRoute: AppSettingsSecurityRoute,
 }
 
-const AppReportsRouteWithChildren = AppReportsRoute._addFileChildren(
-  AppReportsRouteChildren,
+const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
+  AppSettingsRouteChildren,
 )
 
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
-  AppReportsRoute: typeof AppReportsRouteWithChildren
-  AppSettingsRoute: typeof AppSettingsRoute
+  AppSettingsRoute: typeof AppSettingsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
+  AppReportsReportIdRoute: typeof AppReportsReportIdRoute
+  AppReportsIndexRoute: typeof AppReportsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
-  AppReportsRoute: AppReportsRouteWithChildren,
-  AppSettingsRoute: AppSettingsRoute,
+  AppSettingsRoute: AppSettingsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
+  AppReportsReportIdRoute: AppReportsReportIdRoute,
+  AppReportsIndexRoute: AppReportsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

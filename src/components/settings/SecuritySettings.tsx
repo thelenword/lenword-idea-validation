@@ -38,31 +38,32 @@ export function SecuritySettings() {
     : "Unknown";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-6">
       {/* Password Section */}
-      <Card className="bg-white/50 dark:bg-white/[0.02] backdrop-blur-sm border-white/20 dark:border-white/5 shadow-sm">
-        <CardHeader>
-          <CardTitle>Password</CardTitle>
-          <CardDescription>
+      <div className="space-y-4">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-semibold tracking-tight">Password</h2>
+          <p className="text-muted-foreground text-sm">
             Update your password to keep your account secure.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </p>
+        </div>
+        <div>
           <PasswordForm />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+      
+      <Separator className="bg-border/50" />
 
       {/* Account Section */}
-      <Card className="bg-white/50 dark:bg-white/[0.02] backdrop-blur-sm border-destructive/20 dark:border-destructive/10 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-32 bg-destructive/5 blur-[100px] rounded-full -mr-16 -mt-16 pointer-events-none" />
-        <CardHeader>
-          <CardTitle>Account Management</CardTitle>
-          <CardDescription>
+      <div className="space-y-4">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-semibold tracking-tight text-destructive">Account Management</h2>
+          <p className="text-muted-foreground text-sm">
             Manage your active sessions or permanently delete your account.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2">
+          </p>
+        </div>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-1">
             <div>
               <p className="text-sm font-medium">Last Login</p>
               <p className="text-sm text-muted-foreground">{lastSignIn}</p>
@@ -109,8 +110,8 @@ export function SecuritySettings() {
             </p>
             <DeleteAccountDialog />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -26,19 +26,46 @@ function ReportView() {
           return;
         }
 
-        const { data, error } = await supabase
+        let { data, error } = await supabase
           .from("validation_reports")
           .select("*")
           .eq("id", reportId)
           .single();
 
+        if (error) {
+          // If RLS blocked it, it might be an unclaimed guest report (e.g. they logged in from another tab).
+          // Try to claim it, and if successful, fetch again.
+          try {
+            const { apiFetch } = await import("@/lib/api");
+            await apiFetch("/api/claim-report", {
+              method: "POST",
+              body: JSON.stringify({ report_id: reportId }),
+            });
+            const retry = await supabase.from("validation_reports").select("*").eq("id", reportId).single();
+            data = retry.data;
+            error = retry.error;
+          } catch (e) {
+            // keep the original error
+          }
+        }
+
         if (error) throw error;
         if (!data) throw new Error("Report not found");
         const row = data as any;
 
-        if (row.report_data) {
+        if (row.report_data && Object.keys(row.report_data).length > 0) {
           setReport(row.report_data as ValidationReport);
+        } else {
+          // Poll the backend if the report is still processing
+          const { apiFetch } = await import("@/lib/api");
+          const statusRow = await apiFetch(`/api/report-status/${reportId}`);
+          if (statusRow.status === "completed" && statusRow.report_data) {
+            setReport(statusRow.report_data as ValidationReport);
+          } else if (statusRow.status === "failed") {
+            throw new Error("Validation processing failed.");
+          }
         }
+        
         if (row.startup_name) {
           setStartupName(row.startup_name);
         }

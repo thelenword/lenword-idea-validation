@@ -31,14 +31,14 @@ export function AppearanceSettings() {
   };
 
   return (
-    <Card className="bg-white/50 dark:bg-white/[0.02] backdrop-blur-sm border-white/20 dark:border-white/5 shadow-sm">
-      <CardHeader>
-        <CardTitle>Appearance</CardTitle>
-        <CardDescription>
+    <div className="space-y-8">
+      <div className="space-y-1">
+        <h2 className="text-2xl font-semibold tracking-tight">Appearance</h2>
+        <p className="text-muted-foreground">
           Customize the look and feel of the application.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+        </p>
+      </div>
+      <div>
         <RadioGroup
           value={theme}
           onValueChange={handleThemeChange}
@@ -73,7 +73,7 @@ export function AppearanceSettings() {
             </Label>
           </div>
         </RadioGroup>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

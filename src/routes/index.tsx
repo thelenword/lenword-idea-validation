@@ -15,9 +15,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "LENWORD Validate — Validate startups with confidence" },
+      { title: "Lenword | Validate. Build. Grow." },
       { name: "description", content: "AI-powered startup validation, market analysis, and investor readiness reports for founders." },
-      { property: "og:title", content: "LENWORD Validate" },
+      { property: "og:title", content: "Lenword | Validate. Build. Grow." },
       { property: "og:description", content: "AI-powered startup validation, market analysis, and investor readiness reports for founders." },
     ],
   }),
@@ -32,6 +32,13 @@ const fadeUp: import("framer-motion").Variants = {
 function Nav() {
   const { user, profile, loading } = useAuth();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, targetId: string) => {
     e.preventDefault();
@@ -39,12 +46,16 @@ function Nav() {
     const element = document.getElementById(targetId);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
-      window.history.pushState(null, "", `#${targetId}`);
+      if (targetId === "home") {
+        window.history.pushState(null, "", window.location.pathname);
+      } else {
+        window.history.pushState(null, "", `#${targetId}`);
+      }
     }
   };
 
   return (
-    <header className="relative z-30">
+    <header className={`fixed inset-x-0 top-0 w-full z-50 transition-all ${scrolled ? "bg-background/80 backdrop-blur-md shadow-[0_4px_30px_rgba(108,62,246,0.08)]" : "bg-transparent"}`}>
       <div className="mx-auto max-w-7xl px-6 py-5 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <span className="font-semibold tracking-tight">LENWORD</span>
@@ -117,7 +128,7 @@ function Nav() {
 
 function Hero() {
   return (
-    <section id="home" className="relative overflow-hidden">
+    <section className="relative overflow-hidden">
       <AuroraBackground />
       <div className="relative mx-auto max-w-7xl px-6 pt-16 pb-32 lg:pt-24 lg:pb-40">
 
@@ -596,28 +607,10 @@ function FAQSection() {
 function Landing() {
   const location = useLocation();
 
-  useEffect(() => {
-    if (location.hash) {
-      const id = location.hash.replace(/^#/, "");
-      const element = document.getElementById(id);
-      if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      }
-    } else if (window.location.hash) {
-      const id = window.location.hash.replace(/^#/, "");
-      const element = document.getElementById(id);
-      if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      }
-    }
-  }, [location.hash]);
+  // Removed hash auto-scroll on mount so page always starts at top on reload
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background">
+    <div id="home" className="min-h-screen overflow-x-hidden bg-background">
       <Nav />
       <Hero />
       <HowItWorks />

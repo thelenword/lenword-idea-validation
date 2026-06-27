@@ -49,10 +49,10 @@ export function AvatarUploader() {
 
   return (
     <div className="flex items-center gap-6">
-      <div className="relative h-24 w-24">
-        <Avatar className="h-24 w-24 border-2 border-border/50">
+      <div className="relative h-20 w-20 group">
+        <Avatar className="h-20 w-20 border-[3px] border-white dark:border-white/10 shadow-sm transition-transform duration-300 group-hover:scale-105 ring-1 ring-border/50">
           <AvatarImage src={displayUrl || undefined} alt={profile?.full_name || "Avatar"} className="object-cover" />
-          <AvatarFallback className="text-2xl font-medium bg-primary/5 text-primary">
+          <AvatarFallback className="text-2xl font-medium bg-primary/10 text-primary">
             {getInitials(profile?.full_name)}
           </AvatarFallback>
         </Avatar>
@@ -64,7 +64,7 @@ export function AvatarUploader() {
         )}
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <input
           type="file"
           ref={fileInputRef}
@@ -77,12 +77,12 @@ export function AvatarUploader() {
           variant="outline" 
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="w-fit"
+          className="w-fit bg-white/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 border-border/60 transition-colors"
         >
           <Upload className="h-4 w-4 mr-2" />
           Change photo
         </Button>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-[13px] text-muted-foreground/90 max-w-[280px] leading-relaxed">
           Recommended: Square image, at least 400x400px. Max 5MB (JPG, PNG, WebP).
         </p>
       </div>

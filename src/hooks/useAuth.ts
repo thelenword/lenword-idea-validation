@@ -152,12 +152,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase
       .from("profiles")
       // @ts-expect-error Supabase types infer never for update params sometimes
-      .upsert({ id: user.id, email: user.email, ...updates })
+      .update(updates)
+      .eq('id', user.id)
       .select()
       .maybeSingle();
     
     setLoading(false);
-    if (error) throw error;
+    if (error) {
+      console.error("Profile update error:", error);
+      throw error;
+    }
     const profileData = data as Profile | null;
     setProfile(profileData);
     return profileData;
@@ -195,7 +199,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase
         .from("profiles")
         // @ts-expect-error Supabase types infer never for update params sometimes
-        .upsert({ id: user.id, email: user.email, avatar_url: avatarUrl })
+        .update({ avatar_url: avatarUrl })
+        .eq('id', user.id)
         .select()
         .maybeSingle();
 

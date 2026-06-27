@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
-  ShieldCheck, FileText, Sparkles, ArrowRight, Brain, Inbox, Download, TrendingUp,
+  ShieldCheck, FileText, Sparkles, ArrowRight, Brain, Inbox, Download, TrendingUp, Trash2
 } from "lucide-react";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { ScoreRing } from "@/components/ScoreRing";
@@ -23,11 +23,72 @@ const item: import("framer-motion").Variants = {
 
 function Dashboard() {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
+  const [reports, setReports] = useState<any[]>([]);
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this report?")) return;
+    try {
+      const { error } = await supabase.from("validation_reports").delete().eq("id", id);
+      if (error) throw error;
+      setReports(reports.filter((r) => r.id !== id));
+      toast.success("Report deleted successfully");
+    } catch (err) {
+      toast.error("Failed to delete report");
+    }
+  };
+
+  const handleDownload = async (e: React.MouseEvent, reportRow: any) => {
+    e.stopPropagation();
+    try {
+      if (reportRow.pdf_url) {
+        window.open(reportRow.pdf_url, '_blank');
+        return;
+      }
+      
+      if (!reportRow.report_data) {
+        toast.error("Report data is not available yet.");
+        return;
+      }
+
+      toast.loading("Generating PDF...", { id: `pdf-${reportRow.id}` });
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await fetch(`${apiBaseUrl}/api/export-pdf`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({
+          ...reportRow.report_data,
+          startupName: reportRow.startup_name || "startup",
+        }),
+      });
+
+      if (!response.ok) throw new Error(`Failed to export PDF`);
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${(reportRow.startup_name || "startup").replace(/[^a-zA-Z0-9]/g, "-")}-validation-report.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("PDF downloaded!", { id: `pdf-${reportRow.id}` });
+    } catch (err) {
+      toast.error("Failed to download PDF", { id: `pdf-${reportRow.id}` });
+    }
+  };
   
   const rawName = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Founder";
   const displayName = rawName.split(' ')[0];
   
-  const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -159,7 +220,7 @@ function Dashboard() {
                     const date = new Date(r.created_at).toLocaleDateString();
                     const tint = "from-indigo-400 to-primary";
                     return (
-                      <tr key={r.id} onClick={() => r.pdf_url && window.open(r.pdf_url, '_blank')} className={`border-t border-white/60 hover:bg-white/70 transition group ${r.pdf_url ? 'cursor-pointer' : ''}`}>
+                      <tr key={r.id} onClick={() => navigate({ to: "/app/reports/$reportId", params: { reportId: r.id } })} className={`border-t border-white/60 hover:bg-white/70 transition group cursor-pointer`}>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <div className={`h-8 w-8 rounded-lg bg-gradient-to-br ${tint} shadow-sm group-hover:scale-105 transition`} />
@@ -178,15 +239,17 @@ function Dashboard() {
                         <td className="px-4 py-3"><span className="text-xs px-2 py-0.5 rounded-full bg-white border border-border/60">Validation</span></td>
                         <td className="px-4 py-3 text-xs text-muted-foreground">{date}</td>
                         <td className="px-4 py-3 text-right">
-                          {r.pdf_url ? (
-                            <a href={r.pdf_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition inline-flex items-center gap-1">
-                              Open <ArrowRight className="h-3 w-3" />
-                            </a>
-                          ) : (
-                            <Link to="/app/reports" className="text-xs text-primary opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition inline-flex items-center gap-1">
-                              Open <ArrowRight className="h-3 w-3" />
+                          <div className="flex items-center justify-end gap-4 transition mr-8">
+                            <button onClick={(e) => handleDownload(e, r)} className="h-7 w-7 rounded hover:bg-white/50 inline-flex items-center justify-center text-muted-foreground hover:text-foreground transition" aria-label="Download PDF">
+                              <Download className="h-3.5 w-3.5" />
+                            </button>
+                            <button onClick={(e) => handleDelete(e, r.id)} className="h-7 w-7 rounded hover:bg-red-50 text-muted-foreground hover:text-red-500 transition inline-flex items-center justify-center" aria-label="Delete report">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                            <Link to="/app/reports/$reportId" params={{ reportId: r.id }} className="text-xs text-primary translate-x-1 group-hover:translate-x-0 transition inline-flex items-center gap-1 ml-2">
+                              View <ArrowRight className="h-3 w-3" />
                             </Link>
-                          )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -210,7 +273,7 @@ function Dashboard() {
           <div className="relative">
             <div className="flex items-center justify-between">
               <div className="inline-flex items-center gap-1.5 text-[11px] text-white/80 bg-white/10 backdrop-blur rounded-full px-2 py-1">
-                <Brain className="h-3 w-3" /> AI Validation
+                <Brain className="h-3 w-3" /> Lenword Validation
               </div>
               <span className="text-[10px] text-white/60">Real-time analysis</span>
             </div>

@@ -53,7 +53,7 @@ function Signup() {
               body: JSON.stringify({ report_id: pendingReportId })
             })
             localStorage.removeItem('pending_report_id')
-            navigate({ to: `/app/reports/${pendingReportId}` })
+            navigate({ to: '/app/reports/$reportId', params: { reportId: pendingReportId } })
             return
           } catch (err) {
             console.error('Failed to claim report:', err)

@@ -16,6 +16,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/app")({
   beforeLoad: async () => {
+    if (typeof window === 'undefined') return;
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       throw redirect({
@@ -29,7 +30,16 @@ export const Route = createFileRoute("/app")({
 const nav = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/app/reports", label: "Reports", icon: FileText },
-  { to: "/app/settings", label: "Settings", icon: Settings },
+  { 
+    to: "/app/settings", 
+    label: "Settings", 
+    icon: Settings,
+    subItems: [
+      { to: "/app/settings/account", label: "Account" },
+      { to: "/app/settings/appearance", label: "Appearance" },
+      { to: "/app/settings/security", label: "Security" },
+    ]
+  },
 ];
 
 function AppLayout() {
@@ -103,21 +113,47 @@ function AppLayout() {
         <nav className="mt-6 space-y-1">
           <div className="px-2 text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Workspace</div>
           {nav.map((n) => {
-            const active = pathname === n.to || (n.to !== "/app" && pathname.startsWith(n.to));
+            const isActiveGroup = n.to === "/app" ? pathname === n.to : pathname.startsWith(n.to);
+            const isExactActive = pathname === n.to;
+            
             return (
-              <Link key={n.to} to={n.to}
-                className={`group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all ${
-                  active
-                    ? "text-foreground bg-white/80 shadow-[0_4px_18px_-8px_rgba(108,85,249,0.35)] border border-white/80 dark:bg-white/[0.05] dark:border-cyan-900/20 dark:shadow-none"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/60 dark:hover:bg-white/[0.03]"
-                }`}>
-                {active && <motion.span layoutId="nav-dot" className="absolute left-0 h-5 w-1 rounded-r-full" style={{ background: "var(--gradient-primary)" }} />}
-                <n.icon className={`h-4 w-4 transition ${active ? "text-primary" : "group-hover:text-primary"}`} />
-                <span className="flex-1">{n.label}</span>
-                {n.label === "Reports" && reportsCount !== null && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">{reportsCount}</span>
+              <div key={n.label} className="flex flex-col gap-1">
+                <Link to={n.to}
+                  className={`group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all ${
+                    (isActiveGroup && !n.subItems) || isExactActive
+                      ? "text-foreground bg-white/80 shadow-[0_4px_18px_-8px_rgba(108,85,249,0.35)] border border-white/80 dark:bg-white/[0.05] dark:border-cyan-900/20 dark:shadow-none"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/60 dark:hover:bg-white/[0.03]"
+                  }`}>
+                  {((isActiveGroup && !n.subItems) || isExactActive) && <motion.span layoutId="nav-dot" className="absolute left-0 h-5 w-1 rounded-r-full" style={{ background: "var(--gradient-primary)" }} />}
+                  <n.icon className={`h-4 w-4 transition ${isActiveGroup || isExactActive ? "text-primary" : "group-hover:text-primary"}`} />
+                  <span className={`flex-1 ${isActiveGroup && n.subItems ? 'font-medium text-foreground' : ''}`}>{n.label}</span>
+                  {n.label === "Reports" && reportsCount !== null && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">{reportsCount}</span>
+                  )}
+                  {n.subItems && (
+                    <ChevronDown className={`h-4 w-4 transition-transform ${isActiveGroup ? 'rotate-180 text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`} />
+                  )}
+                </Link>
+                
+                {n.subItems && isActiveGroup && (
+                  <div className="pl-9 pr-2 flex flex-col gap-1 mt-1 pb-1">
+                    {n.subItems.map((sub) => {
+                      const isSubActive = pathname === sub.to;
+                      return (
+                        <Link key={sub.to} to={sub.to}
+                          className={`group relative flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-all ${
+                            isSubActive
+                              ? "text-foreground bg-white/60 shadow-sm border border-white/60 dark:bg-white/[0.05] dark:border-cyan-900/20 font-medium"
+                              : "text-muted-foreground hover:text-foreground hover:bg-white/40 dark:hover:bg-white/[0.02]"
+                          }`}>
+                          {isSubActive && <span className="absolute left-0 h-4 w-1 rounded-r-full" style={{ background: "var(--gradient-primary)" }} />}
+                          <span>{sub.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 )}
-              </Link>
+              </div>
             );
           })}
         </nav>
