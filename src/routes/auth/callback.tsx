@@ -10,16 +10,35 @@ function AuthCallback() {
   const navigate = useNavigate()
 
   useEffect(() => {
+    const handleSignInSuccess = async () => {
+      const pendingReportId = localStorage.getItem('pending_report_id')
+      if (pendingReportId) {
+        try {
+          const { apiFetch } = await import('../../lib/api')
+          await apiFetch('/api/claim-report', {
+            method: 'POST',
+            body: JSON.stringify({ report_id: pendingReportId })
+          })
+          localStorage.removeItem('pending_report_id')
+          navigate({ to: '/app/reports' })
+          return
+        } catch (err) {
+          console.error('Failed to claim report:', err)
+        }
+      }
+      navigate({ to: '/app/dashboard' })
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        navigate({ to: '/app/dashboard' })
+        handleSignInSuccess()
       }
     })
     
     // Also check session directly in case the event already fired
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate({ to: '/app/dashboard' })
+        handleSignInSuccess()
       } else {
         // If no session after a delay, they might have cancelled or failed
         setTimeout(() => {

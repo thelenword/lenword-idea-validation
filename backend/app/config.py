@@ -2,9 +2,9 @@ from pydantic_settings import BaseSettings
 from typing import List
 
 class Settings(BaseSettings):
-    XAI_API_KEY: str = ""
+    GROQ_API_KEY: str = ""
     GEMINI_API_KEY: str = ""
-    GROK_MODEL: str = "grok-4.3"
+    GROQ_MODEL: str = "llama3-70b-8192"
     GEMINI_MODEL: str = "gemini-2.5-flash"
     ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
     RATE_LIMIT_STRING: str = "10/minute"

@@ -29,6 +29,23 @@ function Login() {
     setError('')
     try {
       await signIn({ email, password })
+      
+      const pendingReportId = localStorage.getItem('pending_report_id')
+      if (pendingReportId) {
+        try {
+          const { apiFetch } = await import('../../lib/api')
+          await apiFetch('/api/claim-report', {
+            method: 'POST',
+            body: JSON.stringify({ report_id: pendingReportId })
+          })
+          localStorage.removeItem('pending_report_id')
+          navigate({ to: `/app/reports/${pendingReportId}` })
+          return
+        } catch (err) {
+          console.error('Failed to claim report:', err)
+        }
+      }
+      
       navigate({ to: '/app/dashboard' })
     } catch (err: any) {
       if (err.message === 'Invalid login credentials') {

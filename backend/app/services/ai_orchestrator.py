@@ -7,7 +7,7 @@ from datetime import datetime
 
 from app.models.schemas import IdeaValidationRequest, ValidationReport
 from app.services.prompt_builder import build_system_prompt, build_user_prompt
-from app.services.grok_client import call_grok, GrokError
+from app.services.groq_client import call_groq, GroqError
 from app.services.gemini_client import call_gemini, GeminiError
 from app.config import settings
 from app.services.input_quality import analyze_input_quality
@@ -72,10 +72,10 @@ async def get_validation(payload: IdeaValidationRequest) -> ValidationReport:
     Orchestrates validation using Grok with Gemini fallback.
     Supports exactly one corrective retry for malformed JSON before switching/failing.
     """
-    if not settings.XAI_API_KEY and not settings.GEMINI_API_KEY:
+    if not settings.GROQ_API_KEY and not settings.GEMINI_API_KEY:
         raise HTTPException(
             status_code=400,
-            detail="API keys are not configured. Please configure XAI_API_KEY or GEMINI_API_KEY in the environment variables."
+            detail="API keys are not configured. Please configure GROQ_API_KEY or GEMINI_API_KEY in the environment variables."
         )
 
     answers_map = {item.id: item.answer for item in payload.answers}
@@ -84,28 +84,28 @@ async def get_validation(payload: IdeaValidationRequest) -> ValidationReport:
     system_prompt = build_system_prompt()
     user_prompt = build_user_prompt(payload)
 
-    # --- 1. GROK ATTEMPT ---
-    grok_messages = [
+    # --- 1. GROQ ATTEMPT ---
+    groq_messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt}
     ]
     
-    grok_raw = None
+    groq_raw = None
     try:
-        grok_raw = await call_grok(grok_messages, timeout=40.0)
-        report = parse_and_validate(grok_raw, "grok")
+        groq_raw = await call_groq(groq_messages, timeout=40.0)
+        report = parse_and_validate(groq_raw, "groq")
         return apply_quality_penalty(report, quality_mult)
     except Exception as e:
-        logger.warning(f"Grok first attempt failed ({type(e).__name__}: {e})")
-        if isinstance(e, (json.JSONDecodeError, ValidationError)) and grok_raw is not None:
-            grok_messages.append({"role": "assistant", "content": grok_raw})
-            grok_messages.append({
+        logger.warning(f"Groq first attempt failed ({type(e).__name__}: {e})")
+        if isinstance(e, (json.JSONDecodeError, ValidationError)) and groq_raw is not None:
+            groq_messages.append({"role": "assistant", "content": groq_raw})
+            groq_messages.append({
                 "role": "user",
                 "content": "your previous response was not valid JSON matching the schema, return ONLY the JSON object, no markdown fences, no commentary"
             })
             try:
-                grok_raw_retry = await call_grok(grok_messages, timeout=40.0)
-                report = parse_and_validate(grok_raw_retry, "grok")
+                groq_raw_retry = await call_groq(groq_messages, timeout=40.0)
+                report = parse_and_validate(groq_raw_retry, "groq")
                 return apply_quality_penalty(report, quality_mult)
             except Exception:
                 pass
@@ -136,7 +136,7 @@ async def get_validation(payload: IdeaValidationRequest) -> ValidationReport:
             except Exception:
                 pass
 
-    logger.warning("Both Grok and Gemini API calls failed. Falling back to the deterministic validation report generator.")
+    logger.warning("Both Groq and Gemini API calls failed. Falling back to the deterministic validation report generator.")
     try:
         report = generate_fallback_report(payload)
         return apply_quality_penalty(report, quality_mult)

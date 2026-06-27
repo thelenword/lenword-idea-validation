@@ -52,37 +52,7 @@ function Dashboard() {
     fetchReports();
   }, [user]);
 
-  const handleExportCSV = () => {
-    if (reports.length === 0) {
-      toast.info("No reports to export");
-      return;
-    }
 
-    const headers = ["Report Name", "Validation Score", "Stage", "Status", "Updated Date"];
-    const csvContent = [
-      headers.join(","),
-      ...reports.map(r => {
-        const score = r.score ? parseFloat(r.score) : 0;
-        const date = new Date(r.created_at).toLocaleDateString();
-        const stage = "Validation";
-        const status = "Ready"; 
-        const name = `"${(r.startup_name || '').replace(/"/g, '""')}"`;
-        return [name, score, stage, status, date].join(",");
-      })
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `dashboard_reports_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    toast.success("CSV exported successfully");
-  };
 
   if (loading) {
     return (
@@ -156,7 +126,7 @@ function Dashboard() {
           <p className="mt-1 text-sm text-muted-foreground">Welcome back to your LENWORD workspace.</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={handleExportCSV} className="glass rounded-xl px-4 py-2 text-sm font-medium inline-flex items-center gap-2 hover:-translate-y-0.5 transition"><Download className="h-4 w-4" /> Export CSV</button>
+
           <Link to="/validate" className="btn-primary rounded-xl px-4 py-2 text-sm font-medium inline-flex items-center gap-2">
             <Sparkles className="h-4 w-4" /> New report
           </Link>

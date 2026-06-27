@@ -41,7 +41,8 @@ def run_validation_pipeline(report_id: str, user_id: str, startup_name: str, ans
         pdf_bytes = export_report_to_pdf(startup_name, report)
         
         # Upload PDF to Supabase Storage
-        file_path = f"{user_id}/{report_id}.pdf"
+        folder_name = user_id if user_id else "guest"
+        file_path = f"{folder_name}/{report_id}.pdf"
         res = supabase_client.storage.from_("pdfs").upload(
             file_path,
             pdf_bytes,

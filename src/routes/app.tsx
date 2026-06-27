@@ -122,14 +122,7 @@ function AppLayout() {
           })}
         </nav>
 
-        <div className="mt-auto glass-card rounded-2xl p-4 relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 h-28 w-28 rounded-full blur-2xl opacity-50" style={{ background: "var(--gradient-primary)" }} />
-          <div className="relative">
-            <div className="text-xs font-medium">Upgrade to Scale</div>
-            <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">Unlimited reports, custom benchmarks, and investor exports.</p>
-            <button className="mt-3 w-full btn-primary rounded-lg px-3 py-1.5 text-xs font-medium">Upgrade</button>
-          </div>
-        </div>
+
       </aside>
 
       {/* Main */}

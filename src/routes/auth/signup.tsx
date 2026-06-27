@@ -44,6 +44,22 @@ function Signup() {
       
       // If "Confirm email" is turned off in Supabase, we get a session immediately!
       if (data?.session) {
+        const pendingReportId = localStorage.getItem('pending_report_id')
+        if (pendingReportId) {
+          try {
+            const { apiFetch } = await import('../../lib/api')
+            await apiFetch('/api/claim-report', {
+              method: 'POST',
+              body: JSON.stringify({ report_id: pendingReportId })
+            })
+            localStorage.removeItem('pending_report_id')
+            navigate({ to: `/app/reports/${pendingReportId}` })
+            return
+          } catch (err) {
+            console.error('Failed to claim report:', err)
+          }
+        }
+        
         navigate({ to: '/app/dashboard' })
       } else {
         setSuccess(true)
@@ -226,33 +242,6 @@ function Signup() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">I am a...</label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setRole('founder')}
-                className={`py-2 rounded-xl text-sm font-medium border transition ${
-                  role === 'founder' 
-                    ? 'border-primary bg-primary/5 text-primary' 
-                    : 'border-border text-muted-foreground hover:border-border-hover'
-                }`}
-              >
-                Founder
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('investor')}
-                className={`py-2 rounded-xl text-sm font-medium border transition ${
-                  role === 'investor' 
-                    ? 'border-primary bg-primary/5 text-primary' 
-                    : 'border-border text-muted-foreground hover:border-border-hover'
-                }`}
-              >
-                Investor
-              </button>
-            </div>
-          </div>
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Full Name</label>

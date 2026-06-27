@@ -71,7 +71,7 @@ function Nav() {
             <Link to="/app/dashboard" className="hidden sm:inline-flex text-sm font-medium text-foreground/80 hover:text-foreground transition">Sign in</Link>
           )}
           <Link to="/app/dashboard" className="btn-primary inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium">
-            Open app <ArrowRight className="h-3.5 w-3.5" />
+            Get Started <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <button
             onClick={() => setOpen(!open)}
@@ -278,7 +278,7 @@ function AnalyticsCard() {
         {bars.map((h, i) => (
           <motion.div key={i} initial={{ height: 0 }} whileInView={{ height: `${h}%` }} viewport={{ once: true }}
             transition={{ duration: 0.9, delay: i * 0.05, ease: "easeOut" }}
-            className="flex-1 rounded-sm" style={{ background: "var(--gradient-primary)", opacity: 0.4 + (i/bars.length)*0.6 }} />
+            className="flex-1 rounded-sm" style={{ background: "var(--gradient-primary)", opacity: 0.4 + (i / bars.length) * 0.6 }} />
         ))}
       </div>
     </div>
